@@ -21,7 +21,12 @@ export function formatDuration(seconds: number): string {
   if (hours > 0) {
     return `${hours}h ${minutes}m`
   }
-  return `${minutes} minutes`
+
+  if (minutes > 0) {
+    return `${minutes} minute${minutes > 1 ? "s" : ""}`
+  }
+
+  return "Less than a minute"
 }
 
 export function generateRoutePDF(

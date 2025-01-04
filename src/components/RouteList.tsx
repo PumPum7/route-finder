@@ -5,7 +5,7 @@ import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSenso
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { useRoute } from "../contexts/RouteContext"
-import { cn } from "../lib/utils"
+import { cn, formatDuration } from "../lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip"
 import { Location } from "../lib/api"
@@ -88,16 +88,6 @@ export function RouteList() {
       
       reorderLocations(oldIndex, newIndex)
     }
-  }
-
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`
-    }
-    return `${minutes} minutes`
   }
 
   return (
