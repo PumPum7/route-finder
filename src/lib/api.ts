@@ -12,11 +12,17 @@ interface RouteCache {
 const routeCache: RouteCache = {};
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-function generateRouteCacheKey(locations: Location[], mode: TravelMode): string {
+function generateRouteCacheKey(
+  locations: Location[],
+  mode: TravelMode,
+): string {
   return `${mode}|${locations.map((loc) => `${loc.lat},${loc.lon}`).join("|")}`;
 }
 
-function getCachedRoute(locations: Location[], mode: TravelMode): RouteResponse | null {
+function getCachedRoute(
+  locations: Location[],
+  mode: TravelMode,
+): RouteResponse | null {
   const cacheKey = generateRouteCacheKey(locations, mode);
   const cachedData = routeCache[cacheKey];
 
@@ -30,7 +36,11 @@ function getCachedRoute(locations: Location[], mode: TravelMode): RouteResponse 
   return null;
 }
 
-function setCachedRoute(locations: Location[], mode: TravelMode, response: RouteResponse) {
+function setCachedRoute(
+  locations: Location[],
+  mode: TravelMode,
+  response: RouteResponse,
+) {
   const cacheKey = generateRouteCacheKey(locations, mode);
   routeCache[cacheKey] = {
     ...response,
@@ -158,7 +168,7 @@ interface RouteResponse {
 
 export async function calculateRoute(
   locations: Location[],
-  mode: TravelMode = 'driving'
+  mode: TravelMode = "driving",
 ): Promise<RouteResponse | null> {
   if (locations.length < 2) return null;
 

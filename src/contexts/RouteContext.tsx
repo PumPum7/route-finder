@@ -43,7 +43,7 @@ export function RouteProvider({ children }: { children: ReactNode }) {
   const [route, setRoute] = useState<number[][] | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [travelMode, setTravelMode] = useState<TravelMode>('driving');
+  const [travelMode, setTravelMode] = useState<TravelMode>("driving");
   const { toast } = useToast();
 
   const reorderLocations = useCallback((oldIndex: number, newIndex: number) => {

@@ -39,7 +39,7 @@ export function AddressInput() {
       async (position) => {
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
           );
           const data = await response.json();
           if (data.display_name) {
@@ -73,8 +73,8 @@ export function AddressInput() {
       {
         enableHighAccuracy: true,
         timeout: 5000,
-        maximumAge: 0
-      }
+        maximumAge: 0,
+      },
     );
   };
   const inputRef = useRef<HTMLDivElement>(null);
@@ -90,21 +90,28 @@ export function AddressInput() {
       try {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            address
-          )}&limit=5&dedupe=1`
+            address,
+          )}&limit=5&dedupe=1`,
         );
         const data = await response.json();
         setSuggestions(
           data
             .map((item: any) => ({
               place_id: item.place_id,
-              display_name: item.name !== "" ? item.name : item.display_name.replace(/^(\d+),\s*([^,]+)/, "$2 $1"),
+              display_name:
+                item.name !== ""
+                  ? item.name
+                  : item.display_name.replace(/^(\d+),\s*([^,]+)/, "$2 $1"),
               lat: item.lat,
               lon: item.lon,
             }))
-            .filter((item: any, index: number, self: any) => 
-              index === self.findIndex((t: any) => t.lat === item.lat && t.lon === item.lon)
-            )
+            .filter(
+              (item: any, index: number, self: any) =>
+                index ===
+                self.findIndex(
+                  (t: any) => t.lat === item.lat && t.lon === item.lon,
+                ),
+            ),
         );
       } catch (error) {
         console.error("Error fetching suggestions:", error);
@@ -119,7 +126,10 @@ export function AddressInput() {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
+      if (
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     }
@@ -165,12 +175,14 @@ export function AddressInput() {
                       key={suggestion.place_id}
                       className={cn(
                         "w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground",
-                        "focus:bg-accent focus:text-accent-foreground focus:outline-none"
+                        "focus:bg-accent focus:text-accent-foreground focus:outline-none",
                       )}
                       onClick={() => handleAddAddress(suggestion)}
                     >
                       <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <span className="truncate text-left">{suggestion.display_name}</span>
+                      <span className="truncate text-left">
+                        {suggestion.display_name}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -179,8 +191,8 @@ export function AddressInput() {
             <div className="flex gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    onClick={() => handleAddAddress()} 
+                  <Button
+                    onClick={() => handleAddAddress()}
                     disabled={isLoading || isSearching || isLoadingLocation}
                   >
                     {isLoading || isSearching ? (
@@ -194,9 +206,9 @@ export function AddressInput() {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
+                  <Button
                     variant="outline"
-                    onClick={handleGetLocation} 
+                    onClick={handleGetLocation}
                     disabled={isLoading || isSearching || isLoadingLocation}
                   >
                     <Locate className="h-4 w-4" />
