@@ -167,6 +167,11 @@ export function AddressInput() {
                 onChange={(e) => setAddress(e.target.value)}
                 onFocus={() => setShowSuggestions(true)}
                 className="w-full"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleAddAddress();
+                  }
+                }}
               />
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute w-full mt-1 py-1 bg-popover rounded-md border shadow-md z-50 max-h-[300px] overflow-y-auto">
