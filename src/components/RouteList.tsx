@@ -1,13 +1,96 @@
 import { Card, CardHeader, CardContent } from "./ui/card"
 import { Button } from "./ui/button"
-import { MapPin, RotateCw, X, Share2, Download, MoreHorizontal, Loader2 } from "lucide-react"
+import { MapPin, RotateCw, X, Share2, Download, MoreHorizontal, Loader2, GripVertical } from "lucide-react"
+import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core"
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import { useRoute } from "../contexts/RouteContext"
 import { cn } from "../lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip"
+import { Location } from "../lib/api"
+
+function SortableLocation({ location, index }: { location: Location, index: number }) {
+  const { removeLocation } = useRoute()
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: location.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center gap-3 p-3 rounded-lg transition-colors",
+        "bg-muted hover:bg-muted/80"
+      )}
+    >
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="h-8 w-8 p-0 cursor-grab active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </Button>
+      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+        {index + 1}
+      </div>
+      <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <span className="flex-1 truncate text-sm">{location.address}</span>
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
+        onClick={() => removeLocation(location.id)}
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  )
+}
 
 export function RouteList() {
-  const { locations, removeLocation, calculateOptimalRoute, duration, shareRoute, downloadRoute, isLoading } = useRoute()
+  const { locations, calculateOptimalRoute, duration, shareRoute, downloadRoute, isLoading, reorderLocations } = useRoute()
+  
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 8,
+      },
+    })
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = locations.findIndex((loc) => loc.id === active.id)
+      const newIndex = locations.findIndex((loc) => loc.id === over.id)
+      
+      reorderLocations(oldIndex, newIndex)
+      console.log("reordered locations")
+      calculateOptimalRoute()
+    }
+  }
 
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
@@ -82,29 +165,23 @@ export function RouteList() {
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {locations.map((location, index) => (
-            <div 
-              key={location.id} 
-              className={cn(
-                "flex items-center gap-3 p-3 rounded-lg transition-colors",
-                "bg-muted hover:bg-muted/80"
-              )}
+          <DndContext 
+            sensors={sensors}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext 
+              items={locations.map(loc => loc.id)}
+              strategy={verticalListSortingStrategy}
             >
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                {index + 1}
-              </div>
-              <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <span className="flex-1 truncate text-sm">{location.address}</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
-                onClick={() => removeLocation(location.id)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+              {locations.map((location, index) => (
+                <SortableLocation 
+                  key={location.id} 
+                  location={location}
+                  index={index}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
           {locations.length === 0 && (
             <div className="text-sm text-muted-foreground text-center py-8 px-4">
               Add at least two addresses to calculate a route

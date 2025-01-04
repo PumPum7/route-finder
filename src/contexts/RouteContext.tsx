@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from "react"
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react"
 import { Location, geocodeAddress, calculateRoute, getRouteInstructions } from "../lib/api"
 import { generateRoutePDF } from "../lib/utils"
 import { useToast } from "../hooks/use-toast"
@@ -12,7 +12,8 @@ interface RouteContextType {
   duration: number | null
   shareRoute: () => void
   downloadRoute: () => Promise<void>
-  isLoading: boolean
+  isLoading: boolean,
+  reorderLocations: (oldIndex: number, newIndex: number) => void
 }
 
 const RouteContext = createContext<RouteContextType | undefined>(undefined)
@@ -22,6 +23,15 @@ export function RouteProvider({ children }: { children: ReactNode }) {
   const [route, setRoute] = useState<number[][] | null>(null)
   const [duration, setDuration] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  const reorderLocations = useCallback((oldIndex: number, newIndex: number) => {
+    setLocations(locations => {
+      const newLocations = [...locations]
+      const [removed] = newLocations.splice(oldIndex, 1)
+      newLocations.splice(newIndex, 0, removed)
+      return newLocations
+    })
+  }, [])
   const { toast } = useToast()
 
   // Load route from URL on mount
@@ -163,7 +173,8 @@ export function RouteProvider({ children }: { children: ReactNode }) {
         duration,
         shareRoute,
         downloadRoute,
-        isLoading
+        isLoading,
+        reorderLocations
       }}
     >
       {children}

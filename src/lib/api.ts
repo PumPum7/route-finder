@@ -1,5 +1,43 @@
 const NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org";
 
+// Cache for route calculations
+interface RouteCache {
+  [key: string]: {
+    coordinates: [number, number][];
+    duration: number;
+    timestamp: number;
+  }
+}
+
+const routeCache: RouteCache = {};
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+function generateRouteCacheKey(locations: Location[]): string {
+  return locations.map(loc => `${loc.lat},${loc.lon}`).join('|');
+}
+
+function getCachedRoute(locations: Location[]): RouteResponse | null {
+  const cacheKey = generateRouteCacheKey(locations);
+  const cachedData = routeCache[cacheKey];
+  
+  if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+    return {
+      coordinates: cachedData.coordinates,
+      duration: cachedData.duration
+    };
+  }
+  
+  return null;
+}
+
+function setCachedRoute(locations: Location[], response: RouteResponse) {
+  const cacheKey = generateRouteCacheKey(locations);
+  routeCache[cacheKey] = {
+    ...response,
+    timestamp: Date.now()
+  };
+}
+
 const OSRM_BASE_URL = "https://router.project-osrm.org/route/v1";
 
 interface RouteStep {
@@ -120,6 +158,12 @@ export async function calculateRoute(
 ): Promise<RouteResponse | null> {
   if (locations.length < 2) return null;
 
+  // Check cache first
+  const cachedRoute = getCachedRoute(locations);
+  if (cachedRoute) {
+    return cachedRoute;
+  }
+
   const coordinates = locations.map((loc) => `${loc.lon},${loc.lat}`).join(";");
 
   try {
@@ -129,10 +173,15 @@ export async function calculateRoute(
     const data = await response.json();
 
     if (data.routes && data.routes[0]) {
-      return {
+      const routeResponse = {
         coordinates: data.routes[0].geometry.coordinates,
         duration: data.routes[0].duration, // in seconds
       };
+      
+      // Cache the successful response
+      setCachedRoute(locations, routeResponse);
+      
+      return routeResponse;
     }
     return null;
   } catch (error) {
