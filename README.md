@@ -23,6 +23,7 @@ A modern web application for finding optimal routes between multiple locations u
 
 1. Clone the repository
 2. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -30,6 +31,7 @@ npm install
 ### Development
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -37,11 +39,13 @@ npm run dev
 ### Building for Production
 
 Build the application:
+
 ```bash
 npm run build
 ```
 
 Preview the production build:
+
 ```bash
 npm run preview
 ```
@@ -49,6 +53,7 @@ npm run preview
 ### Testing
 
 Run end-to-end tests:
+
 ```bash
 npm run test:e2e
 ```

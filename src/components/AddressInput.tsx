@@ -1,26 +1,26 @@
-import { useState } from "react"
-import { Plus, Loader2 } from "lucide-react"
-import { Input } from "./ui/input"
-import { Button } from "./ui/button"
-import { Card, CardHeader, CardContent } from "./ui/card"
-import { useRoute } from "../contexts/RouteContext"
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip"
+import { useState } from "react";
+import { Plus, Loader2 } from "lucide-react";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Card, CardHeader, CardContent } from "./ui/card";
+import { useRoute } from "../contexts/RouteContext";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function AddressInput() {
-  const [address, setAddress] = useState("")
-  const { addLocation, isLoading } = useRoute()
+  const [address, setAddress] = useState("");
+  const { addLocation, isLoading } = useRoute();
 
   const handleAddAddress = async () => {
-    if (!address.trim()) return
-    await addLocation(address)
-    setAddress("")
-  }
+    if (!address.trim()) return;
+    await addLocation(address);
+    setAddress("");
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleAddAddress()
+    if (e.key === "Enter") {
+      handleAddAddress();
     }
-  }
+  };
 
   return (
     <Card>
@@ -38,10 +38,7 @@ export function AddressInput() {
           />
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
-                onClick={handleAddAddress}
-                disabled={isLoading}
-              >
+              <Button onClick={handleAddAddress} disabled={isLoading}>
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -54,5 +51,5 @@ export function AddressInput() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

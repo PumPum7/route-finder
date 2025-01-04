@@ -6,27 +6,27 @@ interface RouteCache {
     coordinates: [number, number][];
     duration: number;
     timestamp: number;
-  }
+  };
 }
 
 const routeCache: RouteCache = {};
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 function generateRouteCacheKey(locations: Location[]): string {
-  return locations.map(loc => `${loc.lat},${loc.lon}`).join('|');
+  return locations.map((loc) => `${loc.lat},${loc.lon}`).join("|");
 }
 
 function getCachedRoute(locations: Location[]): RouteResponse | null {
   const cacheKey = generateRouteCacheKey(locations);
   const cachedData = routeCache[cacheKey];
-  
+
   if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
     return {
       coordinates: cachedData.coordinates,
-      duration: cachedData.duration
+      duration: cachedData.duration,
     };
   }
-  
+
   return null;
 }
 
@@ -34,7 +34,7 @@ function setCachedRoute(locations: Location[], response: RouteResponse) {
   const cacheKey = generateRouteCacheKey(locations);
   routeCache[cacheKey] = {
     ...response,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 }
 
@@ -71,7 +71,7 @@ interface Leg {
 }
 
 export async function getRouteInstructions(
-  locations: Location[]
+  locations: Location[],
 ): Promise<RouteInstructions | null> {
   if (locations.length < 2) return null;
 
@@ -79,7 +79,7 @@ export async function getRouteInstructions(
 
   try {
     const response = await fetch(
-      `${OSRM_BASE_URL}/driving/${coordinates}?overview=full&geometries=geojson&steps=true`
+      `${OSRM_BASE_URL}/driving/${coordinates}?overview=full&geometries=geojson&steps=true`,
     );
     const data = await response.json();
 
@@ -93,13 +93,13 @@ export async function getRouteInstructions(
             step.maneuver.type === "arrive"
               ? `Arrive at destination (${step.name})`
               : step.maneuver.type === "depart"
-              ? `Depart from origin (${step.name})`
-              : (step.maneuver.type === "turn" &&
-                step.maneuver.modifier !== "straight"
-                  ? `Turn ${step.maneuver.modifier} onto `
-                  : "Continue on ") + step.name,
-          maneuver: step.maneuver
-        }))
+                ? `Depart from origin (${step.name})`
+                : (step.maneuver.type === "turn" &&
+                  step.maneuver.modifier !== "straight"
+                    ? `Turn ${step.maneuver.modifier} onto `
+                    : "Continue on ") + step.name,
+          maneuver: step.maneuver,
+        })),
       );
 
       return {
@@ -123,13 +123,13 @@ export interface Location {
 }
 
 export async function geocodeAddress(
-  address: string
+  address: string,
 ): Promise<Location | null> {
   try {
     const response = await fetch(
       `${NOMINATIM_BASE_URL}/search?format=json&q=${encodeURIComponent(
-        address
-      )}`
+        address,
+      )}`,
     );
     const data = await response.json();
 
@@ -154,7 +154,7 @@ interface RouteResponse {
 }
 
 export async function calculateRoute(
-  locations: Location[]
+  locations: Location[],
 ): Promise<RouteResponse | null> {
   if (locations.length < 2) return null;
 
@@ -168,7 +168,7 @@ export async function calculateRoute(
 
   try {
     const response = await fetch(
-      `${OSRM_BASE_URL}/driving/${coordinates}?overview=full&geometries=geojson`
+      `${OSRM_BASE_URL}/driving/${coordinates}?overview=full&geometries=geojson`,
     );
     const data = await response.json();
 
@@ -177,10 +177,10 @@ export async function calculateRoute(
         coordinates: data.routes[0].geometry.coordinates,
         duration: data.routes[0].duration, // in seconds
       };
-      
+
       // Cache the successful response
       setCachedRoute(locations, routeResponse);
-      
+
       return routeResponse;
     }
     return null;

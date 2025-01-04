@@ -1,11 +1,11 @@
-import { AddressInput } from "./components/AddressInput"
-import { MapContainer } from "./components/MapContainer"
-import { RouteList } from "./components/RouteList"
-import { RouteProvider } from "./contexts/RouteContext"
-import { ThemeProvider } from "./contexts/ThemeContext"
-import { ThemeToggle } from "./components/ui/theme-toggle"
-import { Toaster } from "./components/ui/toaster"
-import { TooltipProvider } from "./components/ui/tooltip"
+import { AddressInput } from "./components/AddressInput";
+import { MapContainer } from "./components/MapContainer";
+import { RouteList } from "./components/RouteList";
+import { RouteProvider } from "./contexts/RouteContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { ThemeToggle } from "./components/ui/theme-toggle";
+import { Toaster } from "./components/ui/toaster";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 function App() {
   return (
@@ -45,4 +45,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
