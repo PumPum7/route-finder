@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   Location,
+  TravelMode,
   geocodeAddress,
   calculateRoute,
   getRouteInstructions,
@@ -31,6 +32,8 @@ interface RouteContextType {
   isLoading: boolean;
   reorderLocations: (oldIndex: number, newIndex: number) => void;
   optimizeRoute: () => void;
+  travelMode: TravelMode;
+  setTravelMode: (mode: TravelMode) => void;
 }
 
 const RouteContext = createContext<RouteContextType | undefined>(undefined);
@@ -40,6 +43,7 @@ export function RouteProvider({ children }: { children: ReactNode }) {
   const [route, setRoute] = useState<number[][] | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [travelMode, setTravelMode] = useState<TravelMode>('driving');
   const { toast } = useToast();
 
   const reorderLocations = useCallback((oldIndex: number, newIndex: number) => {
@@ -118,7 +122,7 @@ export function RouteProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const routeResponse = await calculateRoute(locations);
+      const routeResponse = await calculateRoute(locations, travelMode);
       if (routeResponse) {
         setRoute(routeResponse.coordinates);
         setDuration(routeResponse.duration);
@@ -175,7 +179,7 @@ export function RouteProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const instructions = await getRouteInstructions(locations);
+    const instructions = await getRouteInstructions(locations, travelMode);
     if (instructions) {
       generateRoutePDF(locations, instructions);
       toast({
@@ -259,6 +263,8 @@ export function RouteProvider({ children }: { children: ReactNode }) {
         isLoading,
         reorderLocations,
         optimizeRoute,
+        travelMode,
+        setTravelMode,
       }}
     >
       {children}

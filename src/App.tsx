@@ -4,6 +4,8 @@ import { RouteList } from "./components/RouteList";
 import { RouteProvider } from "./contexts/RouteContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ThemeToggle } from "./components/ui/theme-toggle";
+import { TravelModeSelector } from "./components/TravelModeSelector";
+
 import { Toaster } from "./components/ui/toaster";
 import { TooltipProvider } from "./components/ui/tooltip";
 
@@ -18,7 +20,10 @@ function App() {
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
                   Route Finder
                 </h1>
-                <ThemeToggle />
+                <div className="flex items-center gap-2">
+                  <TravelModeSelector />
+                  <ThemeToggle />
+                </div>
               </div>
 
               {/* Mobile: Map on top, controls below */}

@@ -12,12 +12,12 @@ interface RouteCache {
 const routeCache: RouteCache = {};
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-function generateRouteCacheKey(locations: Location[]): string {
-  return locations.map((loc) => `${loc.lat},${loc.lon}`).join("|");
+function generateRouteCacheKey(locations: Location[], mode: TravelMode): string {
+  return `${mode}|${locations.map((loc) => `${loc.lat},${loc.lon}`).join("|")}`;
 }
 
-function getCachedRoute(locations: Location[]): RouteResponse | null {
-  const cacheKey = generateRouteCacheKey(locations);
+function getCachedRoute(locations: Location[], mode: TravelMode): RouteResponse | null {
+  const cacheKey = generateRouteCacheKey(locations, mode);
   const cachedData = routeCache[cacheKey];
 
   if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
@@ -30,8 +30,8 @@ function getCachedRoute(locations: Location[]): RouteResponse | null {
   return null;
 }
 
-function setCachedRoute(locations: Location[], response: RouteResponse) {
-  const cacheKey = generateRouteCacheKey(locations);
+function setCachedRoute(locations: Location[], mode: TravelMode, response: RouteResponse) {
+  const cacheKey = generateRouteCacheKey(locations, mode);
   routeCache[cacheKey] = {
     ...response,
     timestamp: Date.now(),
@@ -70,8 +70,11 @@ interface Leg {
   steps: Step[];
 }
 
+export type TravelMode = "driving" | "walking" | "cycling";
+
 export async function getRouteInstructions(
   locations: Location[],
+  mode: TravelMode = "driving",
 ): Promise<RouteInstructions | null> {
   if (locations.length < 2) return null;
 
@@ -79,7 +82,7 @@ export async function getRouteInstructions(
 
   try {
     const response = await fetch(
-      `${OSRM_BASE_URL}/driving/${coordinates}?overview=full&geometries=geojson&steps=true`,
+      `${OSRM_BASE_URL}/${mode}/${coordinates}?overview=full&geometries=geojson&steps=true`,
     );
     const data = await response.json();
 
@@ -155,11 +158,12 @@ interface RouteResponse {
 
 export async function calculateRoute(
   locations: Location[],
+  mode: TravelMode = 'driving'
 ): Promise<RouteResponse | null> {
   if (locations.length < 2) return null;
 
   // Check cache first
-  const cachedRoute = getCachedRoute(locations);
+  const cachedRoute = getCachedRoute(locations, mode);
   if (cachedRoute) {
     return cachedRoute;
   }
@@ -168,7 +172,7 @@ export async function calculateRoute(
 
   try {
     const response = await fetch(
-      `${OSRM_BASE_URL}/driving/${coordinates}?overview=full&geometries=geojson`,
+      `${OSRM_BASE_URL}/${mode}/${coordinates}?overview=full&geometries=geojson`,
     );
     const data = await response.json();
 
@@ -179,7 +183,7 @@ export async function calculateRoute(
       };
 
       // Cache the successful response
-      setCachedRoute(locations, routeResponse);
+      setCachedRoute(locations, mode, routeResponse);
 
       return routeResponse;
     }
