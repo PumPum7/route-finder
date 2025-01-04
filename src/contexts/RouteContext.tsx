@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react"
 import { Location, geocodeAddress, calculateRoute, getRouteInstructions } from "../lib/api"
-import { generateRoutePDF } from "../lib/utils"
+import { calculateDistance, generatePermutations, generateRoutePDF } from "../lib/utils"
 import { useToast } from "../hooks/use-toast"
 
 interface RouteContextType {
@@ -14,6 +14,7 @@ interface RouteContextType {
   downloadRoute: () => Promise<void>
   isLoading: boolean,
   reorderLocations: (oldIndex: number, newIndex: number) => void
+  optimizeRoute: () => void
 }
 
 const RouteContext = createContext<RouteContextType | undefined>(undefined)
@@ -168,6 +169,59 @@ export function RouteProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const optimizeRoute = useCallback(() => {
+    if (locations.length < 3) {
+      toast({
+        title: "Cannot optimize route",
+        description: "Need at least 3 locations to optimize",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      // Keep first and last locations fixed
+      const fixedStart = locations[0];
+      const fixedEnd = locations[locations.length - 1];
+      const middlePoints = locations.slice(1, -1);
+
+      // Generate all possible permutations of middle points
+      const permutations = generatePermutations(middlePoints);
+
+      // Find the shortest route
+      let shortestDistance = Infinity;
+      let bestOrder = null;
+
+      permutations.forEach(perm => {
+        const fullRoute = [fixedStart, ...perm, fixedEnd];
+        let totalDistance = 0;
+        
+        for (let i = 0; i < fullRoute.length - 1; i++) {
+          totalDistance += calculateDistance(
+            [fullRoute[i].lat, fullRoute[i].lon],
+            [fullRoute[i + 1].lat, fullRoute[i + 1].lon]
+          );
+        }
+        
+        if (totalDistance < shortestDistance) {
+          shortestDistance = totalDistance;
+          bestOrder = fullRoute;
+        }
+      });
+
+      if (bestOrder) {
+        setLocations(bestOrder);
+        toast({
+          title: "Route optimized",
+          description: "The route has been reordered for the shortest distance."
+        })
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [locations, toast])
+
   return (
     <RouteContext.Provider 
       value={{ 
@@ -180,7 +234,8 @@ export function RouteProvider({ children }: { children: ReactNode }) {
         shareRoute,
         downloadRoute,
         isLoading,
-        reorderLocations
+        reorderLocations,
+        optimizeRoute
       }}
     >
       {children}

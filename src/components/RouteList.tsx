@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardContent } from "./ui/card"
 import { Button } from "./ui/button"
-import { MapPin, RotateCw, X, Share2, Download, MoreHorizontal, Loader2, GripVertical } from "lucide-react"
+import { MapPin, RotateCw, X, Share2, Download, MoreHorizontal, Loader2, GripVertical, Trash } from "lucide-react"
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
@@ -63,7 +63,7 @@ function SortableLocation({ location, index }: { location: Location, index: numb
 }
 
 export function RouteList() {
-  const { locations, calculateOptimalRoute, duration, shareRoute, downloadRoute, isLoading, reorderLocations } = useRoute()
+  const { locations, calculateOptimalRoute, duration, shareRoute, downloadRoute, isLoading, reorderLocations, optimizeRoute, removeLocation } = useRoute()
   
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -90,6 +90,12 @@ export function RouteList() {
     }
   }
 
+  const removeAllLocations = () => {
+    for (const location of locations) {
+      removeLocation(location.id)
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="space-y-2">
@@ -109,10 +115,15 @@ export function RouteList() {
                     ) : (
                       <MoreHorizontal className="h-4 w-4 mr-2" />
                     )}
-                    Export
+                    Actions
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
+                  <DropdownMenuItem onClick={optimizeRoute} disabled={locations.length < 3}>
+                    <RotateCw className="h-4 w-4 mr-2" />
+                    Optimize Route
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={downloadRoute}>
                     <Download className="h-4 w-4 mr-2" />
                     Download PDF
@@ -121,6 +132,11 @@ export function RouteList() {
                   <DropdownMenuItem onClick={shareRoute}>
                     <Share2 className="h-4 w-4 mr-2" />
                     Share Route
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={removeAllLocations}>
+                    <Trash className="h-4 w-4 mr-2" />
+                    Remove All
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
