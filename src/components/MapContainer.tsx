@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from "react";
-import { useTheme } from "../contexts/ThemeContext";
 import {
   MapContainer as LeafletMapContainer,
   TileLayer,
@@ -37,7 +36,6 @@ function MapUpdater() {
 
 export function MapContainer() {
   const { locations, route } = useRoute();
-  const { theme } = useTheme();
 
   const center = useMemo(() => {
     if (locations.length > 0) {
@@ -55,12 +53,7 @@ export function MapContainer() {
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url={
-            theme === "dark"
-              ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          }
-          className={theme === "dark" ? "brightness-[.7] contrast-[1.2]" : ""}
+          url={"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
         />
         {locations.map((location, index) => (
           <Marker
