@@ -96,7 +96,13 @@ export function AddressInput() {
         const data = await response.json();
         setSuggestions(
           data
-            .map((item: any) => ({
+            .map((item: {
+              place_id: number;
+              display_name: string;
+              lat: string;
+              lon: string;
+              name: string;
+            }) => ({
               place_id: item.place_id,
               display_name:
                 item.name !== ""
@@ -106,10 +112,10 @@ export function AddressInput() {
               lon: item.lon,
             }))
             .filter(
-              (item: any, index: number, self: any) =>
+              (item: Suggestion, index: number, self: Suggestion[]) =>
                 index ===
                 self.findIndex(
-                  (t: any) => t.lat === item.lat && t.lon === item.lon,
+                  (t: Suggestion) => t.lat === item.lat && t.lon === item.lon,
                 ),
             ),
         );
