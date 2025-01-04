@@ -84,7 +84,7 @@ test.describe("Route Finder Application", () => {
     await addressInput(page, expect);
 
     // Click export button to open dropdown
-    await page.getByRole("button", { name: "Export" }).click();
+    await page.getByRole("button", { name: "Actions" }).click();
 
     // Click download PDF option in dropdown menu
     await page.getByRole("menuitem", { name: "Download PDF" }).click();
@@ -102,7 +102,7 @@ test.describe("Route Finder Application", () => {
       await addressInput(page, expect);
 
       // Click export button to open dropdown
-      await page.getByRole("button", { name: "Export" }).click();
+      await page.getByRole("button", { name: "Actions" }).click();
 
       // Get shared link
       await page.getByRole("menuitem", { name: "Share Route" }).click();
