@@ -88,7 +88,7 @@ test.describe('Route Finder Application', () => {
   })
 
   test('should correctly share route', async ({ page, context }) => {
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await context.grantPermissions(["clipboard-read"]);
 
     await addressInput(page, expect)
 
