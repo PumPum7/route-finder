@@ -23,6 +23,7 @@ export function RouteProvider({ children }: { children: ReactNode }) {
   const [route, setRoute] = useState<number[][] | null>(null)
   const [duration, setDuration] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
   const reorderLocations = useCallback((oldIndex: number, newIndex: number) => {
     setLocations(locations => {
@@ -32,7 +33,6 @@ export function RouteProvider({ children }: { children: ReactNode }) {
       return newLocations
     })
   }, [])
-  const { toast } = useToast()
 
   // Load route from URL on mount
   useEffect(() => {
@@ -54,6 +54,12 @@ export function RouteProvider({ children }: { children: ReactNode }) {
       }
     }
   }, [])
+
+  useEffect(() => {
+    if (locations.length > 1) {
+      calculateOptimalRoute()
+    }
+  }, [locations])
 
   const addLocation = async (address: string) => {
     setIsLoading(true)

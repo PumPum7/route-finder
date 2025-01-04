@@ -87,8 +87,6 @@ export function RouteList() {
       const newIndex = locations.findIndex((loc) => loc.id === over.id)
       
       reorderLocations(oldIndex, newIndex)
-      console.log("reordered locations")
-      calculateOptimalRoute()
     }
   }
 
